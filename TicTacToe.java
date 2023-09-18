@@ -1,10 +1,9 @@
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -16,6 +15,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class TicTacToe extends Application {
+
     public static SerialPort chosenPort;
     private final Cell[][] cell = new Cell[3][3];
     private final Label lblStatus = new Label("X's turn to play ...");
@@ -23,25 +23,10 @@ public class TicTacToe extends Application {
     private int focusedRow = 0;
     private int focusedCol = 0;
     private char lastPlayer = 'O'; // Initialize with 'O' since 'X' starts
+    private String receivedData;
 
     public static void main(String[] args) {
-        SerialPort[] serialPorts = SerialPort.getCommPorts();
-
-        for (SerialPort port : serialPorts) {
-            System.out.println("Available port: " + port.getSystemPortName());
-        }
-        String portName = "COM4"; // Replace with the name of the serial port you want to connect to
-
-        chosenPort = SerialPort.getCommPort(portName);
-        if (chosenPort.openPort()) {
-            System.out.println("Connected to " + portName);
-        } else {
-            System.err.println("Failed to open " + portName);
-            System.exit(1);
-            return;
-        }
         launch(args);   // launch the TicTacToe application
-
         chosenPort.closePort();
         System.out.println("Closed " + chosenPort);
     }
@@ -69,9 +54,42 @@ public class TicTacToe extends Application {
         primaryStage.getIcons().add(new Image("https://cdn-icons-png.flaticon.com/512/566/566294.png"));
         primaryStage.show();
 
+        // Create a thread to continuously read from the console
+        Thread consoleInputThread = new Thread(() -> {
+            SerialPort[] serialPorts = SerialPort.getCommPorts();
 
-        scene.setOnKeyPressed(event -> cell[focusedRow][focusedCol].MC_handleSwitch(event));
+            for (SerialPort port : serialPorts) {
+                System.out.println("Available port: " + port.getSystemPortName());
+            }
+            String portName = "COM4"; // Replace with the name of the serial port you want to connect to
 
+            chosenPort = SerialPort.getCommPort(portName);
+            if (chosenPort.openPort()) {
+                System.out.println("Connected to " + portName);
+            } else {
+                System.err.println("Failed to open " + portName);
+                System.exit(1);
+                return;
+            }
+
+            while (true) {
+                try {
+                    byte[] readBuffer = new byte[1024];
+                    int numBytesRead = chosenPort.readBytes(readBuffer, readBuffer.length);
+                    receivedData = new String(readBuffer, 0, numBytesRead);
+                    if (receivedData.equals("A") || receivedData.equals("B")) {
+                        cell[focusedRow][focusedCol].MC_handleSwitch();
+                    }
+                } catch (Exception e) {
+                    // Ignore exception
+                }
+            }
+
+
+        });
+
+        consoleInputThread.setDaemon(true);
+        consoleInputThread.start();
 
         cell[focusedRow][focusedCol].setFocusedd(true); // Initial focus on the first cell
     }
@@ -131,58 +149,58 @@ public class TicTacToe extends Application {
             }
         }
 
-        public void MC_handleSwitch(KeyEvent event) {
-            byte[] readBuffer = new byte[1024];
-            int numBytesRead = chosenPort.readBytes(readBuffer, readBuffer.length);
-            String receivedData = new String(readBuffer, 0, numBytesRead);
+        public void MC_handleSwitch() {
+
             if (receivedData.equals("A") || receivedData.equals("B")) {
                 System.out.println("Received data: " + receivedData);
 
-                if (receivedData.equals("A")) {
-                    setFocusedd(false); // Clear focus from the current cell
+                Platform.runLater(() -> {
+                    if (receivedData.equals("A")) {
+                        setFocusedd(false); // Clear focus from the current cell
 
-                    focusedCol++;
-                    if (focusedCol >= 3) {
-                        focusedCol = 0;
-                        focusedRow++;
-                        if (focusedRow >= 3) {
-                            focusedRow = 0;
+                        focusedCol++;
+                        if (focusedCol >= 3) {
+                            focusedCol = 0;
+                            focusedRow++;
+                            if (focusedRow >= 3) {
+                                focusedRow = 0;
+                            }
+                        }
+
+                        cell[focusedRow][focusedCol].setFocusedd(true); // Set focus on the new cell
+                    } else if (receivedData.equals("B") && token == ' ' && whoseTurn != 'E' && whoseTurn != 'D') {
+                        // Check whose turn it is
+                        char currentPlayer = whoseTurn;
+
+                        // Place the current token in the cell
+                        setTokenText(currentPlayer);
+
+                        this.token = currentPlayer;
+
+                        if (isWon(currentPlayer)) {
+                            lblStatus.setText(currentPlayer + " HAS WON !!");
+                            lblStatus.setTextFill(Color.BLUE.brighter());
+                            whoseTurn = 'E'; // Game ends
+                        } else if (isFull()) {
+                            lblStatus.setText("Draw !! The game is over.");
+                            lblStatus.setTextFill(Color.GOLD.darker());
+                            whoseTurn = 'D'; // Game ends
+                        } else {
+                            // Switch to the next player's turn
+                            whoseTurn = (currentPlayer == 'X') ? 'O' : 'X';
+                            lblStatus.setText(whoseTurn + "'s turn to play ...");
+                            lblStatus.setTextFill((whoseTurn == 'X') ? Color.GREEN : Color.RED);
                         }
                     }
-
-                    cell[focusedRow][focusedCol].setFocusedd(true); // Set focus on the new cell
-                } else if (receivedData.equals("B") && token == ' ' && whoseTurn != 'E' && whoseTurn != 'D') {
-                    // Check whose turn it is
-                    char currentPlayer = whoseTurn;
-
-                    // Place the current token in the cell
-                    setTokenText(currentPlayer);
-
-                    this.token = currentPlayer;
-
-                    if (isWon(currentPlayer)) {
-                        lblStatus.setText(currentPlayer + " HAS WON !!");
-                        lblStatus.setTextFill(Color.BLUE.brighter());
-                        whoseTurn = 'E'; // Game ends
-                    } else if (isFull()) {
-                        lblStatus.setText("Draw !! The game is over.");
-                        lblStatus.setTextFill(Color.GOLD.darker());
-                        whoseTurn = 'D'; // Game ends
-                    } else {
-                        // Switch to the next player's turn
-                        whoseTurn = (currentPlayer == 'X') ? 'O' : 'X';
-                        lblStatus.setText(whoseTurn + "'s turn to play ...");
-                        lblStatus.setTextFill((whoseTurn == 'X') ? Color.GREEN : Color.RED);
-                    }
-                }
+                });
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             } else {
-            }
 
+            }
 
         }
 
