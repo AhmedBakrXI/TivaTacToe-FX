@@ -17,10 +17,10 @@
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
-typedef unsigned int uint32;
+typedef unsigned long uint32;
 typedef signed char int8;
 typedef signed short int16;
-typedef signed int int32;
+typedef signed long int32;
 
 typedef uint8 Std_ReturnType;
 
@@ -46,6 +46,9 @@ typedef uint8 Std_ReturnType;
 #define CLEAR_BIT(REG, BIT_POSN)    (REG &= ~(1 << BIT_POSN))
 #define TOGGLE_BIT(REG, BIT_POSN)   (REG ^= (1 << BIT_POSN))
 #define READ_BIT(REG, BIT_POSN)     ((REG >> BIT_POSN) & BIT_MASK)
+
+#define ADD_VALUE_REG(REG, VALUE)       (REG |= VALUE)
+#define CLEAR_VALUE_REG(REG, VALUE)     (REG &= ~VALUE)
 
 /*  Section :   Function Declarations    */
 
