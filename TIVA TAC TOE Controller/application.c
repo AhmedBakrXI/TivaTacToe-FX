@@ -44,6 +44,7 @@ int main()
 void app_init(void)
 {
     ret = SysCtl_ClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_INT | SYSCTL_MAIN_OSC_DIS);
+    ret &= SysCtl_PortEnable(PORTF);
 
     ret &= Led_Init();
     ret &= Switch_Init();
