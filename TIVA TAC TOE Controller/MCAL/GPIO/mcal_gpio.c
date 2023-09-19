@@ -39,8 +39,78 @@ Std_ReturnType GPIO_PortxInit(uint8 port)
 
 Std_ReturnType GPIO_PortxPinRead(uint8 port, uint8 pin, uint8 *logic)
 {
+    Std_ReturnType ret = E_OK;
+
+    switch (port)
+    {
+    case PORTA:
+        /* code */
+        *logic = READ_BIT(GPIO_PORTA_DATA_R, pin);
+        break;
+    case PORTB:
+        /* code */
+        *logic = READ_BIT(GPIO_PORTB_DATA_R, pin);
+        break;
+    case PORTC:
+        /* code */
+        *logic = READ_BIT(GPIO_PORTC_DATA_R, pin);
+        break;
+    case PORTD:
+        /* code */
+        *logic = READ_BIT(GPIO_PORTD_DATA_R, pin);
+        break;
+    case PORTE:
+        /* code */
+        *logic = READ_BIT(GPIO_PORTE_DATA_R, pin);
+        break;
+    case PORTF:
+        /* code */
+        *logic = READ_BIT(GPIO_PORTF_DATA_R, pin);
+        break;
+    
+    default:
+        ret = E_NOT_OK;
+        break;
+    }
+
+    return ret;
 }
 
 Std_ReturnType GPIO_PortxWrite(uint8 port, uint8 value)
 {
+    Std_ReturnType ret = E_OK;
+
+    switch (port)
+    {
+    case PORTA:
+        /* code */
+        ADD_VALUE_REG(GPIO_PORTA_DATA_R, value);
+        break;
+    case PORTB:
+        /* code */
+        ADD_VALUE_REG(GPIO_PORTB_DATA_R, value);
+        break;
+    case PORTC:
+        /* code */
+        ADD_VALUE_REG(GPIO_PORTC_DATA_R, value);
+        break;
+    case PORTD:
+        /* code */
+        ADD_VALUE_REG(GPIO_PORTD_DATA_R, value);
+        break;
+    case PORTE:
+        /* code */
+        ADD_VALUE_REG(GPIO_PORTE_DATA_R, value);
+        break;
+    case PORTF:
+        /* code */
+        ADD_VALUE_REG(GPIO_PORTF_DATA_R, value);
+        break;
+    
+    default:
+        ret = E_NOT_OK;
+        break;
+    }
+
+    return ret;
 }
