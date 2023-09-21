@@ -4,11 +4,10 @@
   <img src="https://cdn-icons-png.flaticon.com/512/566/566294.png" alt="TicTacToe Logo" width="200">
   <img src="https://i.ibb.co/FqLJn9q/TM4C123G.jpg" alt="Tiva C" width="200" >
 </p>
-<a href="https://youtu.be/O3L76q5jkJM"><h3>Click to watch on YouTube</h3></a>
-
 
 **TivaTacToe** is an innovative project that combines the power of the Tiva C microcontroller with the modern user interface capabilities of JavaFX to bring you a classic game in a whole new way. This project showcases the convergence of embedded systems and interactive software development.
 
+### [Click to watch on YouTube now](https://youtu.be/O3L76q5jkJM)
 ## Table of Contents
 
 - [Overview](#overview)
